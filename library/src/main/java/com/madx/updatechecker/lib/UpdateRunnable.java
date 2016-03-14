@@ -73,6 +73,13 @@ public class UpdateRunnable implements Runnable {
     private static final long HOUR = 60 * MIN;
     private static final long DAY = 24 * HOUR;
 
+    private String customNoUpdateDialogTitle;
+    private String customNoUpdateDialogMessage;
+    private String customUpdateDialogTitle;
+    private String customUpdateDialogMessage;
+    private boolean doNotShowUpdatedDialog = true;
+
+
     /**
      * <ul>
      * <li>true - use it when the user directly expressed the wish to verify if an update exists</li>
@@ -183,7 +190,7 @@ public class UpdateRunnable implements Runnable {
                     OrientationUtils.lockOrientation(activity);
                     show_dialog_you_are_not_updated();
                 } else {
-                    if (force) {
+                    if (force && !doNotShowUpdatedDialog) {
                         show_dialog_you_are_updated();
                     }
                 }
@@ -236,9 +243,16 @@ public class UpdateRunnable implements Runnable {
     private void show_dialog_you_are_not_updated() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
 
-        alertDialogBuilder.setTitle(context.getString(R.string.you_are_not_updated_title));
-        alertDialogBuilder.setMessage(context.getString(R.string.you_are_not_updated_message));
-        alertDialogBuilder.setIcon(getCloudDrawable());
+        if (customUpdateDialogTitle != null) {
+            alertDialogBuilder.setTitle(customUpdateDialogTitle);
+        } else {
+            alertDialogBuilder.setTitle(context.getString(R.string.you_are_not_updated_title));
+        }
+        if (customUpdateDialogMessage != null) {
+            alertDialogBuilder.setMessage(customUpdateDialogMessage);
+        } else {
+            alertDialogBuilder.setMessage(context.getString(R.string.you_are_not_updated_message));
+        }
         alertDialogBuilder.setCancelable(false);
         alertDialogBuilder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -262,9 +276,16 @@ public class UpdateRunnable implements Runnable {
     private void show_dialog_you_are_updated() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
 
-        alertDialogBuilder.setTitle(context.getString(R.string.you_are_updated_title));
-        alertDialogBuilder.setMessage(context.getString(R.string.you_are_updated_message));
-        alertDialogBuilder.setIcon(getCloudDrawable());
+        if (customNoUpdateDialogTitle != null) {
+            alertDialogBuilder.setTitle(customNoUpdateDialogTitle);
+        } else {
+            alertDialogBuilder.setTitle(context.getString(R.string.you_are_updated_title));
+        }
+        if (customNoUpdateDialogMessage != null) {
+            alertDialogBuilder.setMessage(customNoUpdateDialogMessage);
+        } else {
+            alertDialogBuilder.setMessage(context.getString(R.string.you_are_updated_message));
+        }
         alertDialogBuilder.setCancelable(false);
         alertDialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -275,17 +296,18 @@ public class UpdateRunnable implements Runnable {
         alertDialogBuilder.show();
     }
 
-    private int getCloudDrawable(){
+    private int getCloudDrawable() {
         return light_theme ? R.drawable.ic_action_collections_cloud_light : R.drawable.ic_action_collections_cloud_dark;
     }
 
     /**
      * Used for comparing different versions of software
-     * @param local_version_string the version name of the app installed on the system
+     *
+     * @param local_version_string  the version name of the app installed on the system
      * @param online_version_string the version name of the app released on the Google Play
      * @return true if a the online_version_string is greater than the local_version_string
      */
-    private static boolean newer_version_available(String local_version_string, String online_version_string){
+    private static boolean newer_version_available(String local_version_string, String online_version_string) {
         DefaultArtifactVersion local_version_mvn = new DefaultArtifactVersion(local_version_string);
         DefaultArtifactVersion online_version_mvn = new DefaultArtifactVersion(online_version_string);
         return local_version_mvn.compareTo(online_version_mvn) == -1 && !local_version_string.equals(new String());
@@ -312,8 +334,33 @@ public class UpdateRunnable implements Runnable {
      * @param context
      * @return the key String of the Last Update Preference
      */
-    private static String getLastUpdateTestKey(Context context){
+    private static String getLastUpdateTestKey(Context context) {
         return context.getString(R.string.last_update_test_preferences) + "_" + context.getPackageName();
     }
 
+
+    public UpdateRunnable noUpdateDialogTitle(String customNoUpdateDialogTitle) {
+        this.customNoUpdateDialogTitle = customNoUpdateDialogTitle;
+        return this;
+    }
+
+    public UpdateRunnable noUpdateDialogMessage(String customNoUpdateDialogMessage) {
+        this.customNoUpdateDialogMessage = customNoUpdateDialogMessage;
+        return this;
+    }
+
+    public UpdateRunnable updateDialogTitle(String customUpdateDialogTitle) {
+        this.customUpdateDialogTitle = customUpdateDialogTitle;
+        return this;
+    }
+
+    public UpdateRunnable updateDialogMessage(String customUpdateDialogMessage) {
+        this.customUpdateDialogMessage = customUpdateDialogMessage;
+        return this;
+    }
+
+    public UpdateRunnable doNotShowUpdatedDialog(boolean doNotShowUpdatedDialog) {
+        this.doNotShowUpdatedDialog = doNotShowUpdatedDialog;
+        return this;
+    }
 }
